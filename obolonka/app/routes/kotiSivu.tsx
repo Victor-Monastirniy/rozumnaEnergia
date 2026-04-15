@@ -16,7 +16,7 @@ export default function Home() {
         <NavLink className="font-bold" to="sivuKaksi">
           toineen sivuun
         </NavLink >
-        <NavLink className="font-bold" to="heatFlow">
+        <NavLink className="font-bold" to="heat-flow">
           Heat Flow
         </NavLink >
       </nav>
