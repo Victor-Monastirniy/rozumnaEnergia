@@ -1,11 +1,23 @@
-import type { Node } from '@xyflow/react';
+import type { Node, Edge } from '@xyflow/react';
 
-export interface NodeData extends Record<string, unknown> {
+export interface BaseNodeData extends Record<string, unknown> {
     label: string;
-    connectedHeaters?: string[];
 }
 
+export interface HouseNodeData extends BaseNodeData {
+    type?: 'house';
+    connectedHeaters: AppNode[];
+}
+export interface HeatSourceNodeData extends BaseNodeData {
+    type?: 'heat';
+    capacity?: number;
+}
+
+export type NodeData = HouseNodeData | HeatSourceNodeData;
+
 export type AppNode = Node<NodeData>;
+
+export type AppEdge = Edge;
 
 export interface ConnectionStats {
     totalHouses: number;
@@ -13,3 +25,17 @@ export interface ConnectionStats {
     connectedHouses: number;
     totalConnections: number;
 }
+
+export const isHouseNode = (node: AppNode): node is Node<HouseNodeData> => {
+    return (
+        node.type === 'house' ||
+        'connectedHeaters' in node.data
+    );
+};
+
+export const isHeatNode = (node: AppNode): node is Node<HeatSourceNodeData> => {
+    return (
+        node.type === 'heat' ||
+        (!('connectedHeaters' in node.data) && node.type !== 'house')
+    );
+};

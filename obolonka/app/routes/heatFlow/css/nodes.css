@@ -1,0 +1,81 @@
+/* nodes.css */
+
+.custom-node {
+    padding: 10px;
+    border-radius: 6px;
+    min-width: 150px;
+    position: relative;
+    font-size: 13px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.house-node {
+    background: #f0f7ff;
+    border: 1px solid #007acc;
+}
+
+.house-node:hover {
+    border-color: #005fa3;
+    box-shadow: 0 4px 12px rgba(0, 122, 204, 0.2);
+    transform: translateY(-2px);
+}
+
+.heat-node {
+    background: #fff5f2;
+    border: 1px solid #e34c26;
+}
+
+.heat-node:hover {
+    border-color: #c53a1b;
+    box-shadow: 0 4px 12px rgba(227, 76, 38, 0.2);
+    transform: scale(1.02);
+}
+
+.custom-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    z-index: 100;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.custom-node:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+.custom-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+}
+
+.house-node .custom-tooltip {
+    background: #333;
+}
+.house-node .custom-tooltip::after {
+    border-color: #333 transparent transparent transparent;
+}
+
+.heat-node .custom-tooltip {
+    background: #e34c26;
+}
+.heat-node .custom-tooltip::after {
+    border-color: #e34c26 transparent transparent transparent;
+}
