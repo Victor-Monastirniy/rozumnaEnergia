@@ -40,7 +40,7 @@ export function EdgeHint() {
                         </svg>
                     </kbd>
 
-                    <span className="text-gray-700 ml-0.5 font-medium">to delete connection</span>
+                    <span className="text-gray-700 ml-0.5 font-medium">to delete edge</span>
                 </div>
             </div>
         </div>

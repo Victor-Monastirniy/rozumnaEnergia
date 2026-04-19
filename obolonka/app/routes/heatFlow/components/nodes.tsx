@@ -24,17 +24,11 @@ export function HouseNode({ id, data }: NodeProps): ReactElement {
     });
 
     return (
-        <div className="custom-node house-node relative group">
+        <div className="custom-node house-node relative group p-3 bg-white border border-gray-200 rounded-lg shadow-sm min-w-[150px]">
             <button
                 className="absolute -top-2.5 -right-2.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-white opacity-0 invisible group-hover:opacity-100 group-hover:visible hover:bg-red-600 hover:scale-110 transition-all duration-200 z-10"
                 onClick={onDelete}
                 title="Delete node"
-                style={{
-                    padding: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
             >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 6L6 18M6 6l12 12" />
@@ -43,18 +37,29 @@ export function HouseNode({ id, data }: NodeProps): ReactElement {
 
             <Handle type="target" position={Position.Left} style={{ borderRadius: '2px' }} />
 
-            <div style={{ fontWeight: 'bold', color: '#007acc' }}>
-                HOUSE: {label}
+            {/* TYPE BADGE */}
+            <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[9px] font-black uppercase rounded border border-blue-200 leading-none">
+                        House
+                    </span>
+                </div>
+
+                <div className="text-sm font-bold text-gray-800 tracking-tight">
+                    {label}
+                </div>
             </div>
 
+            {/* SOURCES SECTION */}
             {connectedHeaters.length > 0 && (
-                <div style={{ fontSize: '11px', color: '#444' }}>
-                    Sources: {connectedLabels.join(', ')}
+                <div className="pt-1 border-t border-gray-50 text-[10px] text-gray-500 italic leading-tight">
+                    <span className="font-semibold not-italic">Sources:</span> {connectedLabels.join(', ')}
                 </div>
             )}
 
+            {/* TOOLTIP */}
             <div className="custom-tooltip">
-                ID: {label} • {connectedHeaters.length} sources
+                ID: {label} | {connectedHeaters.length} sources
             </div>
         </div>
     );
@@ -72,29 +77,36 @@ export function HeatNode({ id, data }: NodeProps): ReactElement {
     const { label } = data as unknown as NodeData;
 
     return (
-        <div className="custom-node heat-node relative group">
+        <div className="custom-node heat-node relative group p-3 bg-white border border-gray-200 rounded-lg shadow-sm min-w-[150px]">
             <button
                 className="absolute -top-2.5 -right-2.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-white opacity-0 invisible group-hover:opacity-100 group-hover:visible hover:bg-red-600 hover:scale-110 transition-all duration-200 z-10"
                 onClick={onDelete}
                 title="Delete node"
-                style={{
-                    padding: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
             >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
             </button>
 
-            <div style={{ fontWeight: 'bold', color: '#e34c26' }}>
-                HEAT SRC: {label}
+            <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-[9px] font-black uppercase rounded border border-orange-200 leading-none">
+                        Heat Source
+                    </span>
+                </div>
+
+                <div className="text-sm font-bold text-gray-800 tracking-tight">
+                    {label}
+                </div>
             </div>
 
-            <Handle type="source" position={Position.Right} style={{ borderRadius: '2px', background: '#e34c26' }} />
+            <Handle
+                type="source"
+                position={Position.Right}
+                style={{ borderRadius: '2px', background: '#f97316' }}
+            />
 
+            {/* TOOLTIP */}
             <div className="custom-tooltip">
                 Click and drag to connect
             </div>
