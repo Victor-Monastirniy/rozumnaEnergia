@@ -139,7 +139,7 @@ export function ConfigForm({ node, onUpdate, onClose }: ConfigFormProps) {
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900">
-                                {isHeat ? 'Heat Source' : isTank ? 'Buffer Tank' : 'House'} Конфігурація
+                                {isHeat ? 'Джерлло тепла' : isTank ? 'Водяний бак' : 'Будинок'} Конфігурація
                             </h3>
                         </div>
                     </div>

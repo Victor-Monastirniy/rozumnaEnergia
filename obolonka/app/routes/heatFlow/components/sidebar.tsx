@@ -23,7 +23,7 @@ export function Sidebar({ width, minWidth, setWidth }: SidebarProps): ReactEleme
         (e: MouseEvent): void => {
             if (isResizing) {
                 const newWidth = e.clientX;
-                if (newWidth > minWidth && newWidth < 500) {
+                if (newWidth > minWidth && newWidth < 600) {
                     setWidth(newWidth);
                     localStorage.setItem('sidebar-width', newWidth.toString());
                 }
