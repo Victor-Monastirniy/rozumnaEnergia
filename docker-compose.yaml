@@ -4,6 +4,11 @@ services:
       context: ./obolonka
     ports:
       - "5173:3000"
+  backend_troian:
+    image: твій_нік/smart-energy-backend:latest
+    ports:
+      - "8085:8085"
+    restart: always    
 
   pokazovaSlurzba:
     image: bondarenkorodion/slurzba1
