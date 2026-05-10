@@ -12,7 +12,7 @@ export default function Home() {
 
     const [text, setText] = useState("Warten Sie bitte, bis das Ladung fertig ist...");
     useEffect(() => {
-        fetch("http://localhost:3000/dva").then((d) => {
+        fetch("http://pokazovaSlurzba:3000/dva").then((d) => {
             d.json().then((j) => {
                 setText(j[0].kirje)
             })

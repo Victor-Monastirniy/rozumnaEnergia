@@ -4,8 +4,16 @@ services:
       context: ./obolonka
     ports:
       - "5173:3000"
+    networks:
+      - mererza
 
   pokazovaSlurzba:
     image: bondarenkorodion/slurzba1
     ports:
       - "3000:3000"
+    networks:
+      - mererza
+
+networks:
+  mererza:
+    driver: bridge
