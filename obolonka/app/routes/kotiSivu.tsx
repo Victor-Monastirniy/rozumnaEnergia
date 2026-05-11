@@ -8,7 +8,7 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function Home() {
-  
+
 
   return (
     <div className="p-4">
@@ -23,6 +23,14 @@ export default function Home() {
         >
           $ Smart Energy EMS (Троян)
         </NavLink>
+      <nav className="bg-lime-200 p-4 mb-4 flex gap-4">
+        <NavLink className="font-bold" to="sivuKaksi">
+          toineen sivuun
+        </NavLink >
+        <NavLink className="font-bold" to="heat-flow">
+          Heat Flow
+        </NavLink >
+        </nav>
       </nav>
 
       <h1 className="text-4xl mb-4 mt-6">

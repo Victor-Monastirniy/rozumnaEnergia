@@ -2,10 +2,16 @@ services:
   backend_troian:
     image: vitaliktroian04/smart-energy-stability:latest
     ports:
-      - "8085:8085"
-    restart: always    
+      - "6028:8085"
+    restart: always
 
   pokazovaSlurzba:
     image: bondarenkorodion/slurzba1
     ports:
       - "3000:3000"
+    networks:
+      - mererza
+
+networks:
+  mererza:
+    driver: bridge

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:8085/api';
+import { API_BASE_URL } from "consts";
 
 export default function ScenariosTab() {
   const [scenarios, setScenarios] = useState([]);
@@ -14,11 +14,11 @@ export default function ScenariosTab() {
   // Стан редагування (якщо null - створюємо, якщо число - редагуємо)
   const [editingLinkId, setEditingLinkId] = useState<number | null>(null);
 
-  const fetchScenarios = () => fetch(`${API_URL}/scenarios`).then(r => r.json()).then(setScenarios);
+  const fetchScenarios = () => fetch(`${API_BASE_URL}:6028/api/scenarios`).then(r => r.json()).then(setScenarios);
   
   useEffect(() => { 
     fetchScenarios(); 
-    fetch(`${API_URL}/equipment`).then(r => r.json()).then(d => { 
+    fetch(`${API_BASE_URL}:6028/api/equipment`).then(r => r.json()).then(d => { 
       setEquipment(d); 
       if (d.length) setDevForm(f => ({ ...f, eq_id: d[0].id })); 
     }); 
@@ -26,7 +26,7 @@ export default function ScenariosTab() {
 
   const loadScenDevices = (id: number) => {
     setSelectedScen(id);
-    fetch(`${API_URL}/scenarios/${id}/devices`).then(r => r.json()).then(setScenDevices);
+    fetch(`${API_BASE_URL}:6028/api/scenarios/${id}/devices`).then(r => r.json()).then(setScenDevices);
     handleCancel(); // Скидаємо форму при зміні сценарію
   };
 
@@ -67,13 +67,13 @@ export default function ScenariosTab() {
 
     if (editingLinkId) {
       // ОНОВЛЕННЯ ІСНУЮЧОГО
-      await fetch(`${API_URL}/devices/${editingLinkId}`, {
+      await fetch(`${API_BASE_URL}:6028/api/devices/${editingLinkId}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
     } else {
       // ДОДАВАННЯ НОВОГО
-      await fetch(`${API_URL}/scenarios/${selectedScen}/devices`, {
+      await fetch(`${API_BASE_URL}:6028/api/scenarios/${selectedScen}/devices`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
@@ -106,7 +106,7 @@ export default function ScenariosTab() {
 
   const removeDev = async (link_id: number, name: string) => {
     if (confirm(`Видалити прилад "${name}" з цього сценарію?`)) {
-      await fetch(`${API_URL}/devices/${link_id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}:6028/api/devices/${link_id}`, { method: 'DELETE' });
       if (editingLinkId === link_id) handleCancel();
       loadScenDevices(selectedScen as number);
     }
@@ -265,117 +265,3 @@ export default function ScenariosTab() {
     </div>
   );
 }
-
-
-/*import React, { useState, useEffect } from 'react';
-
-const API_URL = 'http://localhost:8085/api';
-
-export default function ScenariosTab() {
-  const [scenarios, setScenarios] = useState([]);
-  const [selectedScen, setSelectedScen] = useState<number | null>(null);
-  const [scenDevices, setScenDevices] = useState([]);
-  const [equipment, setEquipment] = useState([]);
-
-  const [devForm, setDevForm] = useState({ eq_id: '', cab_len: 15, cab_sq: 2.5, cab_mat: 'Мідь', prio: 3, hours: [] as number[] });
-
-  const fetchScenarios = () => fetch(`${API_URL}/scenarios`).then(r => r.json()).then(setScenarios);
-  
-  useEffect(() => { 
-    fetchScenarios(); 
-    fetch(`${API_URL}/equipment`).then(r => r.json()).then(d => { 
-      setEquipment(d); 
-      if (d.length) setDevForm(f => ({ ...f, eq_id: d[0].id })); 
-    }); 
-  }, []);
-
-  const loadScenDevices = (id: number) => {
-    setSelectedScen(id);
-    fetch(`${API_URL}/scenarios/${id}/devices`).then(r => r.json()).then(setScenDevices);
-  };
-
-  const toggleHour = (h: number) => {
-    setDevForm(prev => ({
-      ...prev, hours: prev.hours.includes(h) ? prev.hours.filter(x => x !== h) : [...prev.hours, h]
-    }));
-  };
-
-  const handleAddDeviceToScen = async () => {
-    if (!selectedScen || devForm.hours.length === 0) return alert("Оберіть сценарій та години!");
-    await fetch(`${API_URL}/scenarios/${selectedScen}/devices`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ equipment_id: Number(devForm.eq_id), hours: devForm.hours, cab_len: Number(devForm.cab_len), cab_sq: Number(devForm.cab_sq), cab_mat: devForm.cab_mat, priority: Number(devForm.prio) })
-    });
-    loadScenDevices(selectedScen);
-    setDevForm({ ...devForm, hours: [] });
-  };
-
-  const removeDev = async (link_id: number) => {
-    await fetch(`${API_URL}/devices/${link_id}`, { method: 'DELETE' });
-    loadScenDevices(selectedScen as number);
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <div className="bg-white p-4 rounded shadow">
-        <h2 className="text-lg font-bold mb-4">Сценарії</h2>
-        <ul className="space-y-2 mb-4">
-          {scenarios.map((s: any) => (
-            <li key={s.id} onClick={() => loadScenDevices(s.id)} className={`p-2 rounded cursor-pointer ${selectedScen === s.id ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
-              {s.name}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="md:col-span-3 bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-bold mb-4">{selectedScen ? "Прилади в сценарії" : "Оберіть сценарій зліва"}</h2>
-        {selectedScen && (
-          <>
-            <table className="w-full text-left border-collapse mb-6 text-sm">
-              <thead><tr className="bg-gray-200"><th className="p-2 border">Назва</th><th className="p-2 border">Кабель</th><th className="p-2 border">Черга</th><th className="p-2 border">Години</th><th className="p-2 border"></th></tr></thead>
-              <tbody>
-                {scenDevices.map((d: any) => (
-                  <tr key={d.link_id} className="border-b">
-                    <td className="p-2 border font-bold">{d.name}</td>
-                    <td className="p-2 border">{d.cab_mat}, {d.cab_len}м, {d.cab_sq}мм²</td>
-                    <td className="p-2 border">{d.priority}</td>
-                    <td className="p-2 border">{d.working_hours.length} слотів</td>
-                    <td className="p-2 border text-red-500 cursor-pointer hover:underline" onClick={() => removeDev(d.link_id)}>Видалити</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <div className="bg-gray-50 p-4 rounded border">
-              <h3 className="font-bold mb-2">Додати прилад у сценарій</h3>
-              <div className="flex flex-wrap gap-4 mb-4">
-                <select className="border p-2 rounded w-48" value={devForm.eq_id} onChange={e => setDevForm({ ...devForm, eq_id: e.target.value })}>
-                  {equipment.map((e: any) => <option key={e.id} value={e.id}>{e.name} ({e.model})</option>)}
-                </select>
-                <select className="border p-2 rounded" value={devForm.prio} onChange={e => setDevForm({ ...devForm, prio: Number(e.target.value) })}>
-                  <option value={1}>1 - Критична</option><option value={2}>2 - Необхідна</option><option value={3}>3 - Звичайна</option>
-                </select>
-                <input type="number" className="border p-2 rounded w-24" placeholder="Довжина" value={devForm.cab_len} onChange={e => setDevForm({ ...devForm, cab_len: Number(e.target.value) })} />
-                <button onClick={handleAddDeviceToScen} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Додати прилад</button>
-              </div>
-              
-              <h4 className="text-sm font-bold mb-2">Оберіть години роботи:</h4>
-              <div className="grid grid-cols-12 gap-1">
-                {Array.from({ length: 48 }).map((_, i) => {
-                  const h = i * 0.5;
-                  const isSelected = devForm.hours.includes(h);
-                  return (
-                    <button key={h} onClick={() => toggleHour(h)} className={`text-xs p-1 rounded border ${isSelected ? 'bg-green-500 text-white border-green-600' : 'bg-white hover:bg-gray-200'}`}>
-                      {Math.floor(h)}:{h % 1 ? '30' : '00'}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}*/

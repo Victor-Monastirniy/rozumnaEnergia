@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:8085/api';
+
+import { API_BASE_URL } from "consts";
+
 
 export default function DevicesTab() {
   const [devices, setDevices] = useState([]);
@@ -13,8 +15,8 @@ export default function DevicesTab() {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchData = () => {
-    fetch(`${API_URL}/equipment`).then(r => r.json()).then(setDevices);
-    fetch(`${API_URL}/coefficients`).then(r => r.json()).then(data => { 
+    fetch(`${API_BASE_URL}:6028/api/equipment`).then(r => r.json()).then(setDevices);
+    fetch(`${API_BASE_URL}:6028/api/coefficients`).then(r => r.json()).then(data => { 
       setCoefs(data); 
       // Встановлюємо дефолтний тип, якщо форма порожня
       if (data.length > 0) setForm(f => ({ ...f, coef_id: f.coef_id || data[0].id })); 
@@ -40,13 +42,13 @@ export default function DevicesTab() {
 
     if (editingId) {
       // ОНОВЛЕННЯ (PUT)
-      await fetch(`${API_URL}/equipment/${editingId}`, {
+      await fetch(`${API_BASE_URL}:6028/api/equipment/${editingId}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
     } else {
       // СТВОРЕННЯ (POST)
-      await fetch(`${API_URL}/equipment`, {
+      await fetch(`${API_BASE_URL}:6028/api/equipment`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
@@ -77,7 +79,7 @@ export default function DevicesTab() {
 
   const handleDelete = async (id: number, name: string) => {
     if (confirm(`Ви впевнені, що хочете назавжди видалити "${name}"?`)) {
-      await fetch(`${API_URL}/equipment/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}:6028/api/equipment/${id}`, { method: 'DELETE' });
       // Якщо ми видаляємо прилад, який зараз редагуємо — скидаємо форму
       if (editingId === id) handleCancel();
       fetchData();

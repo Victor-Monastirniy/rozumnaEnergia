@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 
-const API_URL = 'http://localhost:8085/api';
+import { API_BASE_URL } from "consts";
+
 
 export default function SimulationTab() {
   const [scenarios, setScenarios] = useState([]);
@@ -27,7 +28,7 @@ export default function SimulationTab() {
   const [editingCutId, setEditingCutId] = useState<number | null>(null);
 
   useEffect(() => { 
-    fetch(`${API_URL}/scenarios`).then(r => r.json()).then(d => { 
+    fetch(`${API_BASE_URL}:6028/api/scenarios`).then(r => r.json()).then(d => { 
       setScenarios(d); 
       if(d.length) setSimConfig(c => ({...c, scen_id: d[0].id})); 
     }); 
@@ -63,7 +64,7 @@ export default function SimulationTab() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/simulate`, {
+      const res = await fetch(`${API_BASE_URL}:6028/api/simulate`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           scenario_id: Number(simConfig.scen_id), 
@@ -101,7 +102,7 @@ export default function SimulationTab() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/advisor`, {
+      const res = await fetch(`${API_BASE_URL}:6028/api/advisor`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           scenario_id: Number(simConfig.scen_id), 
@@ -143,7 +144,7 @@ export default function SimulationTab() {
   };
 
   const applyAdvisor = async () => {
-    await fetch(`${API_URL}/advisor/apply`, {
+    await fetch(`${API_BASE_URL}:6028/api/advisor/apply`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ scenario_id: Number(simConfig.scen_id), confirmed_cuts: confirmedCuts })
     });
@@ -454,165 +455,3 @@ export default function SimulationTab() {
     </div>
   );
 }
-
-/*import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const API_URL = 'http://localhost:8085/api';
-
-export default function SimulationTab() {
-  const [scenarios, setScenarios] = useState([]);
-  const [simConfig, setSimConfig] = useState({ scen_id: '', type: 'Батарея', v_nom: 230, p_max: 3000, cap: 1140, limit: 20 });
-  const [simData, setSimData] = useState<any>(null);
-  
-  const [advisorData, setAdvisorData] = useState<any>(null);
-  const [confirmedCuts, setConfirmedCuts] = useState<any>({});
-
-  useEffect(() => { 
-    fetch(`${API_URL}/scenarios`).then(r => r.json()).then(d => { 
-      setScenarios(d); 
-      if(d.length) setSimConfig(c => ({...c, scen_id: d[0].id})); 
-    }); 
-  }, []);
-
-  const runSimulation = async () => {
-    const res = await fetch(`${API_URL}/simulate`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario_id: Number(simConfig.scen_id), source_type: simConfig.type, v_nom: Number(simConfig.v_nom), p_max: Number(simConfig.p_max), capacity_wh: Number(simConfig.cap), batt_limit: Number(simConfig.limit), soc_q3: 50, soc_q2: 30 })
-    });
-    const result = await res.json();
-    if(result.status === 'success') {
-      const formatted = result.data.Hour.map((h: number, i: number) => ({
-        time: `${Math.floor(h)}:${h%1===0?'00':'30'}`,
-        Power: result.data.Total_P[i],
-        Voltage: result.data.V_outlet[i],
-        SoC: result.data.SoC[i]
-      }));
-      setSimData(formatted);
-    } else alert(result.detail);
-  };
-
-  const runAdvisor = async () => {
-    const res = await fetch(`${API_URL}/advisor`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario_id: Number(simConfig.scen_id), source_type: "Батарея", v_nom: Number(simConfig.v_nom), p_max: Number(simConfig.p_max), capacity_wh: Number(simConfig.cap), batt_limit: Number(simConfig.limit) })
-    });
-    const result = await res.json();
-    if(result.status === 'success') {
-      if(result.suggestions.length === 0) return alert("Сценарій ідеальний! Відключень не потрібно.");
-      setAdvisorData(result);
-      const initialCuts: any = {};
-      result.suggestions.forEach((s: any) => initialCuts[s.link_id] = s.suggested_cuts);
-      setConfirmedCuts(initialCuts);
-    }
-  };
-
-  const applyAdvisor = async () => {
-    await fetch(`${API_URL}/advisor/apply`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario_id: Number(simConfig.scen_id), confirmed_cuts: confirmedCuts })
-    });
-    alert("Оптимізацію застосовано! Графік приладів змінено.");
-    setAdvisorData(null);
-    runSimulation();
-  };
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 relative">
-      <div className="bg-white p-6 rounded shadow space-y-4">
-        <h2 className="text-xl font-bold">Налаштування</h2>
-        <select className="w-full border p-2 rounded" value={simConfig.scen_id} onChange={e => setSimConfig({...simConfig, scen_id: e.target.value})}>
-          {scenarios.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
-        
-        <div>
-          <label className="block text-sm text-gray-600">Джерело:</label>
-          <select className="w-full border p-2 rounded" value={simConfig.type} onChange={e => setSimConfig({...simConfig, type: e.target.value})}>
-            <option value="Батарея">Автономне (АКБ + Інвертор)</option>
-            <option value="Мережа">Електромережа</option>
-          </select>
-        </div>
-
-        {simConfig.type === 'Батарея' && (
-          <>
-            <div><label className="block text-xs">Макс. потужність інвертора (Вт):</label><input type="number" className="w-full border p-2 rounded" value={simConfig.p_max} onChange={e => setSimConfig({...simConfig, p_max: Number(e.target.value)})} /></div>
-            <div><label className="block text-xs">Ємність акумулятора (Вт·год):</label><input type="number" className="w-full border p-2 rounded" value={simConfig.cap} onChange={e => setSimConfig({...simConfig, cap: Number(e.target.value)})} /></div>
-            <div><label className="block text-xs">Ліміт розряду (до %):</label><input type="number" className="w-full border p-2 rounded" value={simConfig.limit} onChange={e => setSimConfig({...simConfig, limit: Number(e.target.value)})} /></div>
-            <button onClick={runAdvisor} className="w-full bg-orange-500 text-white font-bold py-3 rounded shadow hover:bg-orange-600 mt-4">🛠️ Радник: Оптимізувати</button>
-          </>
-        )}
-        <button onClick={runSimulation} className="w-full bg-green-600 text-white font-bold py-3 rounded shadow hover:bg-green-700 mt-2">📈 Побудувати графіки</button>
-      </div>
-
-      <div className="lg:col-span-3 bg-white p-6 rounded shadow flex flex-col space-y-8">
-        {simData ? (
-          <>
-            <div className="h-64 w-full">
-              <h3 className="font-bold text-center mb-2">Профіль навантаження (Вт)</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={simData}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="Power" name="Сумарна Потужність" fill="#F59E0B" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="h-64 w-full">
-              <h3 className="font-bold text-center mb-2">Напруга (В) та Рівень заряду (%)</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={simData}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                  <XAxis dataKey="time" />
-                  <YAxis yAxisId="left" domain={[0, 250]} />
-                  {simConfig.type === 'Батарея' && <YAxis yAxisId="right" orientation="right" domain={[0, 105]} />}
-                  <Tooltip />
-                  <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="Voltage" name="Напруга мережі" stroke="#2563EB" strokeWidth={2} dot={false} />
-                  {simConfig.type === 'Батарея' && <Line yAxisId="right" type="stepAfter" dataKey="SoC" name="Заряд АКБ (%)" stroke="#10B981" strokeWidth={2} dot={false} />}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </>
-        ) : (
-          <div className="h-full flex items-center justify-center text-gray-400">Натисніть "Побудувати графіки" зліва</div>
-        )}
-      </div>
-
-      {advisorData && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-full overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-2">🛠️ Інтерактивний Радник Оптимізації</h2>
-            {advisorData.battery_info.shortage ? <p className="text-red-600 font-bold mb-4">🔴 Дефіцит енергії! Сценарій споживає більше, ніж є в АКБ.</p> : <p className="text-orange-600 font-bold mb-4">⚠️ Виявлено перевантаження інвертора!</p>}
-            <div className="space-y-4 mb-6">
-              {advisorData.suggestions.map((s: any) => {
-                const isSelected = confirmedCuts[s.link_id] !== undefined;
-                return (
-                  <div key={s.link_id} className={`p-4 border-2 rounded-lg ${isSelected ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}`}>
-                    <label className="flex items-center space-x-3 font-bold cursor-pointer">
-                      <input type="checkbox" className="w-5 h-5" checked={isSelected} 
-                        onChange={(e) => {
-                          const newCuts = {...confirmedCuts};
-                          if(e.target.checked) newCuts[s.link_id] = s.suggested_cuts;
-                          else delete newCuts[s.link_id];
-                          setConfirmedCuts(newCuts);
-                        }} 
-                      />
-                      <span>[{s.priority} черга] {s.name}</span>
-                    </label>
-                  </div>
-                )
-              })}
-            </div>
-            <div className="flex space-x-4">
-              <button onClick={applyAdvisor} className="flex-1 bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700">Застосувати відключення</button>
-              <button onClick={() => setAdvisorData(null)} className="px-6 bg-gray-400 text-white font-bold py-3 rounded hover:bg-gray-500">Скасувати</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}*/
