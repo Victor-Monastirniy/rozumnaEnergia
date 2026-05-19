@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink } from "react-router";
 import { ArrowLeft, RefreshCw, Calendar, Settings2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {HISTORY_API_URL} from "../local_consts"
 
 const ComparisonPage = () => {
     const [data, setData] = useState([]);
@@ -69,7 +70,7 @@ const ComparisonPage = () => {
         else if (durationMs <= 365 * 24 * 60 * 60 * 1000) window = '10d';
         else window = "1mo"
 
-        let url = `http://localhost:3000/api/history?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}&window=${window}`;
+        let url = `${HISTORY_API_URL}?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}&window=${window}`;
         if(durationMs >= 24 * 60 * 60 * 1000)
             url += "&offset=10h"
 

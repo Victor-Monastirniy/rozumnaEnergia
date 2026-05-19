@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {HISTORY_API_URL, STATUS_API_URL, MQTT_WEBSOCKETS_API_URL,
+  SIMULATOR_CONTROL_TOPIC, SENSOR_DATA_TOPIC, SIMULATOR_STATUS_TOPIC} from "./local_consts"
 import mqtt from 'mqtt';
 import {
   Cpu, Smartphone, Refrigerator
 } from 'lucide-react';
 import type {HistoryPoint, SystemStatus, ConsumerDevice, IngestorStatus} from './types';
-import AnalyticsPage from "./components/AnalyticsPage.tsx";
-import ComparisonPage from "./components/ComparisonPage.tsx";
 import { Dashboard } from './components/Dashboard.tsx';
 
 let globalMqttClient: mqtt.MqttClient | null = null;
@@ -57,7 +56,7 @@ const MonitoringApp = () => {
   const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   useEffect(() => {
-     fetch('http://localhost:3000/api/history')
+     fetch(HISTORY_API_URL)
          .then(res => res.json())
          .then(data => {
            const historyData = data.map((d: any) => ({
@@ -80,7 +79,7 @@ const MonitoringApp = () => {
 
      // Підключення до MQTT сервера
     if (!globalMqttClient) {
-      globalMqttClient = mqtt.connect('ws://localhost:9001', {
+      globalMqttClient = mqtt.connect(MQTT_WEBSOCKETS_API_URL, {
         clientId: 'smart_ui_' + Math.random().toString(16).substring(2, 8),
         username: 'frontend',
         password: 'frontend_pass',
@@ -89,14 +88,14 @@ const MonitoringApp = () => {
 
     const client = globalMqttClient;
     client.on('connect', () => {
-      client.subscribe(['sensor/data', 'simulator/status']);
+      client.subscribe([SENSOR_DATA_TOPIC, SIMULATOR_STATUS_TOPIC]);
     });
 
     const handleMessage = (topic: string, message: Buffer) => {
       try {
         const payloadStr = message.toString();
 
-        if (topic === 'simulator/status') {
+        if (topic === SIMULATOR_STATUS_TOPIC) {
           const newState = payloadStr === 'ON';
           setIsSimulatorOn(newState);
           
@@ -116,7 +115,7 @@ const MonitoringApp = () => {
 
         const payload = JSON.parse(payloadStr);
 
-        if (topic === 'sensor/data') {
+        if (topic === SENSOR_DATA_TOPIC) {
           if (payload.status === 'online') {
             setIsMqttConnected(true);
             if (waitingForFirstData.current) {
@@ -195,7 +194,7 @@ const MonitoringApp = () => {
         })
         return
       }
-      fetch('http://localhost:3000/api/status')
+      fetch(STATUS_API_URL)
           .then(res => res.json())
           .then(data => setIngestorInfo(data))
           .catch(() => setIngestorInfo({
@@ -226,7 +225,7 @@ const MonitoringApp = () => {
       waitingForFirstData.current = true;
     }
     
-    globalMqttClient?.publish('simulator/control', nextState, { qos: 1 });
+    globalMqttClient?.publish(SIMULATOR_CONTROL_TOPIC, nextState, { qos: 1 });
   };
 
     return (

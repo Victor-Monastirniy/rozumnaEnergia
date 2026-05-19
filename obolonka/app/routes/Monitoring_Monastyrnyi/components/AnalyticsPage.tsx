@@ -3,6 +3,7 @@ import { useParams} from 'react-router-dom';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { NavLink } from "react-router";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {HISTORY_API_URL} from "../local_consts"
 
 const AnalyticsPage = () => {
     const { type } = useParams();
@@ -30,7 +31,7 @@ const AnalyticsPage = () => {
         setError(null);
         let url = '';
         if (range === 'last30') {
-            url = `http://localhost:3000/api/history?limit=30`;
+            url = `${HISTORY_API_URL}:3000/api/history?limit=30`;
         } else {
             const win = range === '5m' ? '10s' :
                         range === '15m' ? '30s' :
@@ -38,7 +39,7 @@ const AnalyticsPage = () => {
                         range === '24h' ? '45m' :
                         range === '7d' ? '6h' :
                         range === '30d' ? '1d' : '1m';
-            url = `http://localhost:3000/api/history?range=${range}&window=${win}`;
+            url = `${HISTORY_API_URL}?range=${range}&window=${win}`;
             if (range === "30d")
                 url += "&offset=10h";
         }
