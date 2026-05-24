@@ -8,4 +8,7 @@ export default [
     route("heat-flow", "routes/heatFlow/index.tsx"),
 
     route("sinusInvertor", "routes/sinusInvertor/index.jsx"),
+
+    route("cryptomonitoring_Hubin", "routes/cryptomonitoring_Hubin/index.jsx"),
+
 ] satisfies RouteConfig;
