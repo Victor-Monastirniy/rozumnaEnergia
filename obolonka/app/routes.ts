@@ -12,4 +12,7 @@ export default [
     route("Monitoring_Monastyrnyi/analytics/:type", "routes/Monitoring_Monastyrnyi/components/AnalyticsPage.tsx"),
     route("Monitoring_Monastyrnyi/comparison", "routes/Monitoring_Monastyrnyi/components/ComparisonPage.tsx"),
 
+    route("iot-gateway", "routes/iotGateway/index.jsx"),
+    route("cryptomonitoring_Hubin", "routes/cryptomonitoring_Hubin/index.jsx"),
+
 ] satisfies RouteConfig;
